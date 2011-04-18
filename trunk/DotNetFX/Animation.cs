@@ -24,12 +24,66 @@ using System.Timers;
 namespace DotNetFX {
     public class Animation {
         public const int TIMEOUT = 15;
+        private static HashSet<Animation> s_ActiveAnimations = new HashSet<Animation>();
+        private static Timer s_GlobalTimer = null;
+
+        private static void StartGlobalTimer() {
+            s_GlobalTimer = new Timer(TIMEOUT);
+            s_GlobalTimer.Elapsed += CycleAnimations;
+            s_GlobalTimer.Start();
+        }
+
+        private static void KillGlobalTimer() {
+            if (s_GlobalTimer != null) {
+                s_GlobalTimer.Stop();
+                s_GlobalTimer.Dispose();
+                s_GlobalTimer = null;
+            }
+        }
+
+        private static void CycleAnimations(object sender, ElapsedEventArgs e) {
+            DateTime now = DateTime.Now;
+
+            foreach (Animation animation in s_ActiveAnimations) {
+                animation.Cycle(now);
+            }
+
+            if (s_ActiveAnimations.Count == 0) {
+                KillGlobalTimer();
+            } else {
+                StartGlobalTimer();
+            }
+        }
+
+        private static void RegisterAnimation(Animation animation) {
+            if (!s_ActiveAnimations.Contains(animation)) {
+                s_ActiveAnimations.Add(animation);
+            }
+
+            // If the timer is not already started, start it now.
+            if (!s_GlobalTimer.Enabled) {
+                StartGlobalTimer();
+            }
+        }
+
+        private static void UnregisterAnimation(Animation animation) {
+            s_ActiveAnimations.Remove(animation);
+
+            // If the global timer is running and we no longer have any active animations, we stop the timer.
+            if (s_GlobalTimer != null && s_GlobalTimer.Enabled && s_ActiveAnimations.Count == 0) {
+                KillGlobalTimer();
+            }
+        }
 
         private double[] m_Start;
         private double[] m_End;
         private int m_Duration;
         private Func<double, double> m_AccelFunc;
 
+        private DateTime m_StartTime;
+        private DateTime m_LastFrame;
+        private int m_Fps;
+        private DateTime m_EndTime;
         private double[] m_Current;
         private AnimationState m_State;
         private double m_Progress;
@@ -46,18 +100,6 @@ namespace DotNetFX {
             m_Current = new double[m_Start.Length];
             m_State = AnimationState.Stopped;
             m_Progress = 0;
-        }
-
-        public enum EventType {
-            Play,
-            Begin,
-            Resume,
-            End,
-            Stop,
-            Finish,
-            Pause,
-            Animate,
-            Destroy
         }
 
         public enum AnimationState {
@@ -90,6 +132,17 @@ namespace DotNetFX {
                 return false;
             }
 
+            UnregisterAnimation(this);
+
+            m_StartTime = DateTime.Now;
+
+            if (m_State == AnimationState.Paused) {
+                m_StartTime.AddMilliseconds(-m_Duration * m_Progress);
+            }
+
+            m_EndTime = m_StartTime + new TimeSpan(m_Duration * 10000);
+            m_LastFrame = m_StartTime;
+
             if (m_Progress == 0) {
                 OnBegin();
             }
@@ -102,13 +155,14 @@ namespace DotNetFX {
 
             m_State = AnimationState.Playing;
 
-            // TODO: Start animation timer here
+            RegisterAnimation(this);
+            Cycle(m_StartTime);
 
             return true;
         }
 
         public void Stop(bool gotoEnd) {
-            // TODO: Stop animation timer here
+            UnregisterAnimation(this);
             m_State = AnimationState.Stopped;
 
             if (gotoEnd) {
@@ -123,19 +177,21 @@ namespace DotNetFX {
 
         public void Pause() {
             if (m_State == AnimationState.Playing) {
-                // TODO: Pause animation timer here
+                UnregisterAnimation(this);
                 m_State = AnimationState.Paused;
                 OnPause();
             }
         }
 
-        private void Cycle() {
-            // TODO: Replace the below line with a calculation based on timestamps
-            m_Progress = 0;
+        private void Cycle(DateTime now) {
+            m_Progress = (now - m_StartTime).TotalMilliseconds / (m_EndTime - m_StartTime).TotalMilliseconds;
 
             if (m_Progress >= 1) {
                 m_Progress = 1;
             }
+
+            m_Fps = (int)(1000d / (now - m_LastFrame).TotalMilliseconds);
+            m_LastFrame = now;
 
             if (m_AccelFunc == null) {
                 UpdateCoords(m_Progress);
@@ -146,19 +202,24 @@ namespace DotNetFX {
             // Animation has finished.
             if (m_Progress == 1) {
                 m_State = AnimationState.Stopped;
-                // TODO: Stop timer here
+                UnregisterAnimation(this);
 
                 OnFinish();
                 OnEnd();
+            // Animation is still under way.
             } else if (m_State == AnimationState.Playing) {
                 OnAnimate();
             }
         }
 
         private void UpdateCoords(double t) {
-            m_Current = new double[m_Start.Length];
-            for (int i = 0; i < m_Start.Length; i++) {
-                m_Current[i] = (m_End[i] - m_Start[i]) * t + m_Start[i];
+            if (t == 1) {
+                m_Current = m_End;
+            } else {
+                m_Current = new double[m_Start.Length];
+                for (int i = 0; i < m_Start.Length; i++) {
+                    m_Current[i] = (m_End[i] - m_Start[i]) * t + m_Start[i];
+                }
             }
         }
 
