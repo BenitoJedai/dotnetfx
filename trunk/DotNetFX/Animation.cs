@@ -22,17 +22,27 @@ using System.Text;
 using System.Timers;
 
 namespace DotNetFX {
+    /// <summary>
+    /// A class for performing animations and visual transitions.
+    /// </summary>
     public class Animation {
+        /// <summary>Default timeout for animations (in milliseconds).</summary>
         public const int TIMEOUT = 15;
+
+        /// <summary>A set of animations which should be cycled on the global timer.</summary>
         private static HashSet<Animation> s_ActiveAnimations = new HashSet<Animation>();
+
+        /// <summary>The global timer.</summary>
         private static Timer s_GlobalTimer = null;
 
+        /// <summary>Constructs the global timer, attaches a listener, and starts it.</summary>
         private static void StartGlobalTimer() {
             s_GlobalTimer = new Timer(TIMEOUT);
             s_GlobalTimer.Elapsed += CycleAnimations;
             s_GlobalTimer.Start();
         }
 
+        /// <summary>Stops the global timer, disposes it, and sets the reference to null.</summary>
         private static void KillGlobalTimer() {
             if (s_GlobalTimer != null) {
                 s_GlobalTimer.Stop();
@@ -41,7 +51,11 @@ namespace DotNetFX {
             }
         }
 
+        /// <summary>
+        /// Cycles all registered animations.
+        /// </summary>
         private static void CycleAnimations(object sender, ElapsedEventArgs e) {
+            // Cycle all animations at the "same time".
             DateTime now = DateTime.Now;
 
             foreach (Animation animation in s_ActiveAnimations) {
@@ -55,6 +69,10 @@ namespace DotNetFX {
             }
         }
 
+        /// <summary>
+        /// Register an animation to be cycled on the global timer.
+        /// </summary>
+        /// <param name="animation">The animation to register.</param>
         private static void RegisterAnimation(Animation animation) {
             if (!s_ActiveAnimations.Contains(animation)) {
                 s_ActiveAnimations.Add(animation);
@@ -66,6 +84,10 @@ namespace DotNetFX {
             }
         }
 
+        /// <summary>
+        /// Remove an animation from the list of animations which are cycled on the global timer.
+        /// </summary>
+        /// <param name="animation">The animation to unregister.</param>
         private static void UnregisterAnimation(Animation animation) {
             s_ActiveAnimations.Remove(animation);
 
@@ -75,22 +97,72 @@ namespace DotNetFX {
             }
         }
 
-        private double[] m_Start;
-        private double[] m_End;
-        private int m_Duration;
+        /// <summary>
+        /// Start point of the animation.
+        /// </summary>
+        protected double[] m_Start;
+
+        /// <summary>
+        /// End point of the animation.
+        /// </summary>
+        protected double[] m_End;
+
+        /// <summary>
+        /// Duration of the animation in milliseconds.
+        /// </summary>
+        protected int m_Duration;
+
+        /// <summary>
+        /// Acceleration function, which must return a number between 0 and 1 for inputs between 0
+        /// and 1.
+        /// </summary>
         private Func<double, double> m_AccelFunc;
 
-        private DateTime m_StartTime;
-        private DateTime m_LastFrame;
-        private int m_Fps;
-        private DateTime m_EndTime;
-        private double[] m_Current;
-        private AnimationState m_State;
-        private double m_Progress;
+        /// <summary>
+        /// Timestamp for when the animation was started.
+        /// </summary>
+        protected DateTime m_StartTime;
 
+        /// <summary>
+        /// Timestamp for when the last frame was run.
+        /// </summary>
+        protected DateTime m_LastFrame;
+
+        /// <summary>
+        /// Current frame rate.
+        /// </summary>
+        private int m_Fps;
+
+        /// <summary>
+        /// Timestamp for when animation is expected to finish.
+        /// </summary>
+        protected DateTime m_EndTime;
+
+        /// <summary>
+        /// Current co-ordinates for animation.
+        /// </summary>
+        protected double[] m_Current;
+
+        /// <summary>
+        /// Current state of the animation.
+        /// </summary>
+        private AnimationState m_State;
+
+        /// <summary>
+        /// Percent of the way through the animation (between 0.0 and 1.0).
+        /// </summary>
+        protected double m_Progress;
+
+        /// <summary>
+        /// Constructs an animation object.
+        /// </summary>
+        /// <param name="start">Array of start co-ordinates.</param>
+        /// <param name="end">Array of end co-ordinates.</param>
+        /// <param name="duration">Length of animation in milliseconds.</param>
+        /// <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         public Animation(double[] start, double[] end, int duration, Func<double, double> accelFunc) {
             if (start.Length != end.Length) {
-                throw new Exception("Start and end arrays must be the same length.");
+                throw new AnimationException("Start and end arrays must be the same length.");
             }
             m_Start = start;
             m_End = end;
@@ -102,28 +174,51 @@ namespace DotNetFX {
             m_Progress = 0;
         }
 
+        /// <summary>
+        /// Enum for the possible states of an animation.
+        /// </summary>
         public enum AnimationState {
             Stopped,
             Paused,
             Playing
         }
 
+        /// <summary>
+        /// Gets the animation state.
+        /// </summary>
         public AnimationState State {
             get { return m_State; }
         }
 
-        public double[] Coordinates {
+        /// <summary>
+        /// Gets the current co-ordinates of the animation.
+        /// </summary>
+        public double[] CurrentCoordinates {
             get { return m_Current; }
         }
 
+        /// <summary>
+        /// Gets the progress of the animation (a number between 0.0 and 1.0).
+        /// </summary>
         public double Progress {
             get { return m_Progress; }
         }
 
+        /// <summary>
+        /// Starts or resumes an animation.
+        /// </summary>
+        /// <returns>Whether animation was started.</returns>
         public bool Play() {
             return Play(false);
         }
 
+        /// <summary>
+        /// Starts or resumes an animation.
+        /// </summary>
+        /// <param name="restart">
+        /// Whether to restart the animation from the beginning if it has been paused.
+        /// </param>
+        /// <returns>Whether animation was started.</returns>
         public bool Play(bool restart) {
             if (restart || m_State == AnimationState.Stopped) {
                 m_Progress = 0;
@@ -161,6 +256,10 @@ namespace DotNetFX {
             return true;
         }
 
+        /// <summary>
+        /// Stops the animation.
+        /// </summary>
+        /// <param name="gotoEnd">If true, the animation will move to the end co-ordinates.</param>
         public void Stop(bool gotoEnd) {
             UnregisterAnimation(this);
             m_State = AnimationState.Stopped;
@@ -175,6 +274,9 @@ namespace DotNetFX {
             OnEnd();
         }
 
+        /// <summary>
+        /// Pauses the animation (iff it's playing).
+        /// </summary>
         public void Pause() {
             if (m_State == AnimationState.Playing) {
                 UnregisterAnimation(this);
@@ -183,6 +285,10 @@ namespace DotNetFX {
             }
         }
 
+        /// <summary>
+        /// Handles the actual iteration of the animation in a timeout.
+        /// </summary>
+        /// <param name="now">The current time.</param>
         private void Cycle(DateTime now) {
             m_Progress = (now - m_StartTime).TotalMilliseconds / (m_EndTime - m_StartTime).TotalMilliseconds;
 
@@ -212,6 +318,10 @@ namespace DotNetFX {
             }
         }
 
+        /// <summary>
+        /// Calculates current co-ordinates, based on the current state.
+        /// </summary>
+        /// <param name="t">Percentage of the way through the animation as a decimal.</param>
         private void UpdateCoords(double t) {
             if (t == 1) {
                 m_Current = m_End;
@@ -224,64 +334,131 @@ namespace DotNetFX {
         }
 
         #region Events
-        private void OnAnimate() {
+        /// <summary>
+        /// Dispatches the Animate event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnAnimate() {
             if (Animate != null) {
                 Animate(this);
             }
         }
 
-        private void OnBegin() {
+        /// <summary>
+        /// Dispatches the Begin event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnBegin() {
             if (Begin != null) {
                 Begin(this);
             }
         }
 
-        private void OnEnd() {
+        /// <summary>
+        /// Dispatches the End event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnEnd() {
             if (End != null) {
                 End(this);
             }
         }
 
-        private void OnFinish() {
+        /// <summary>
+        /// Dispatches the Finish event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnFinish() {
             if (Finish != null) {
                 Finish(this);
             }
         }
 
-        private void OnPause() {
+        /// <summary>
+        /// Dispatches the Pause event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnPause() {
             if (PauseEvent != null) {
                 PauseEvent(this);
             }
         }
 
-        private void OnPlay() {
+        /// <summary>
+        /// Dispatches the Play event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnPlay() {
             if (PlayEvent != null) {
                 PlayEvent(this);
             }
         }
 
-        private void OnResume() {
+        /// <summary>
+        /// Dispatches the Resume event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnResume() {
             if (Resume != null) {
                 Resume(this);
             }
         }
 
-        private void OnStop() {
+        /// <summary>
+        /// Dispatches the Stop event. Subclasses should override this instead of listening to
+        /// the event.
+        /// </summary>
+        protected virtual void OnStop() {
             if (StopEvent != null) {
                 StopEvent(this);
             }
         }
 
+        /// <summary>
+        /// Event that is fired on each animation step.
+        /// </summary>
         public event AnimationEvent Animate;
+
+        /// <summary>
+        /// Event that is fired when animation begins.
+        /// </summary>
         public event AnimationEvent Begin;
+        
+        /// <summary>
+        /// Event that is fired when animation ends.
+        /// </summary>
         public event AnimationEvent End;
+
+        /// <summary>
+        /// Event that is fired when animation finishes naturally.
+        /// </summary>
         public event AnimationEvent Finish;
+
+        /// <summary>
+        /// Event that is fired when animation is paused.
+        /// </summary>
         public event AnimationEvent PauseEvent;
+
+        /// <summary>
+        /// Event that is fired when the Play method is called.
+        /// </summary>
         public event AnimationEvent PlayEvent;
+
+        /// <summary>
+        /// Event that is fired when animation resumes.
+        /// </summary>
         public event AnimationEvent Resume;
+
+        /// <summary>
+        /// Event that is fired when animation is forcefully stopped.
+        /// </summary>
         public event AnimationEvent StopEvent;
         #endregion
     }
 
+    /// <summary>
+    /// Defines an event handler to handle animation events.
+    /// </summary>
+    /// <param name="animation">The animation firing the event.</param>
     public delegate void AnimationEvent(Animation animation);
 }
