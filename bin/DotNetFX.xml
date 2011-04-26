@@ -273,7 +273,7 @@
             <param name="duration">Length of animation in milliseconds.</param>
             <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         </member>
-        <member name="M:DotNetFX.PredefinedEffect.UpdateStyle">
+        <member name="M:DotNetFX.PredefinedEffect.UpdateStyleInternal">
             <summary>
             Called to update the style of the element.
             </summary>
@@ -304,7 +304,7 @@
             <param name="duration">Length of animation in milliseconds.</param>
             <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         </member>
-        <member name="M:DotNetFX.Fade.UpdateStyle">
+        <member name="M:DotNetFX.Fade.UpdateStyleInternal">
             <summary>
             Animation event handler that will set the opacity of a control.
             </summary>
@@ -334,7 +334,7 @@
             <param name="duration">Length of animation in milliseconds.</param>
             <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         </member>
-        <member name="M:DotNetFX.ResizeWidth.UpdateStyle">
+        <member name="M:DotNetFX.ResizeWidth.UpdateStyleInternal">
             <summary>
             Animation event handler that will resize an element by setting its width.
             </summary>
@@ -420,7 +420,7 @@
             <param name="duration">Length of animation in milliseconds.</param>
             <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         </member>
-        <member name="M:DotNetFX.Resize.UpdateStyle">
+        <member name="M:DotNetFX.Resize.UpdateStyleInternal">
             <summary>
             Animation event handler that will resize a control by setting its width and height.
             </summary>
@@ -440,7 +440,7 @@
             <param name="duration">Length of animation in milliseconds.</param>
             <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         </member>
-        <member name="M:DotNetFX.ResizeHeight.UpdateStyle">
+        <member name="M:DotNetFX.ResizeHeight.UpdateStyleInternal">
             <summary>
             Animation event handler that will resize an element by setting its height.
             </summary>
@@ -473,7 +473,7 @@
             <param name="duration">Length of animation in milliseconds.</param>
             <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
         </member>
-        <member name="M:DotNetFX.Slide.UpdateStyle">
+        <member name="M:DotNetFX.Slide.UpdateStyleInternal">
             <inheritdoc/>
         </member>
         <member name="T:DotNetFX.SlideFrom">
