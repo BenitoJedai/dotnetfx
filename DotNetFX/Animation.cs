@@ -79,7 +79,7 @@ namespace DotNetFX {
             }
 
             // If the timer is not already started, start it now.
-            if (!s_GlobalTimer.Enabled) {
+            if (s_GlobalTimer == null || !s_GlobalTimer.Enabled) {
                 StartGlobalTimer();
             }
         }
