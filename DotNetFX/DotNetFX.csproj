@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\DotNetFX.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -74,6 +75,6 @@
   -->
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)..\bin\$(TargetFileName)"
-copy "$(TargetDir)$(TargetName).xml" "$(ProjectDir)..\bin\$(TargetName).xml"</PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -29,74 +29,6 @@ namespace DotNetFX {
         /// <summary>Default timeout for animations (in milliseconds).</summary>
         public const int TIMEOUT = 15;
 
-        /// <summary>A set of animations which should be cycled on the global timer.</summary>
-        private static HashSet<Animation> s_ActiveAnimations = new HashSet<Animation>();
-
-        /// <summary>The global timer.</summary>
-        private static Timer s_GlobalTimer = null;
-
-        /// <summary>Constructs the global timer, attaches a listener, and starts it.</summary>
-        private static void StartGlobalTimer() {
-            s_GlobalTimer = new Timer(TIMEOUT);
-            s_GlobalTimer.Elapsed += CycleAnimations;
-            s_GlobalTimer.Start();
-        }
-
-        /// <summary>Stops the global timer, disposes it, and sets the reference to null.</summary>
-        private static void KillGlobalTimer() {
-            if (s_GlobalTimer != null) {
-                s_GlobalTimer.Stop();
-                s_GlobalTimer.Dispose();
-                s_GlobalTimer = null;
-            }
-        }
-
-        /// <summary>
-        /// Cycles all registered animations.
-        /// </summary>
-        private static void CycleAnimations(object sender, ElapsedEventArgs e) {
-            // Cycle all animations at the "same time".
-            DateTime now = DateTime.Now;
-
-            foreach (Animation animation in s_ActiveAnimations) {
-                animation.Cycle(now);
-            }
-
-            if (s_ActiveAnimations.Count == 0) {
-                KillGlobalTimer();
-            } else {
-                StartGlobalTimer();
-            }
-        }
-
-        /// <summary>
-        /// Register an animation to be cycled on the global timer.
-        /// </summary>
-        /// <param name="animation">The animation to register.</param>
-        private static void RegisterAnimation(Animation animation) {
-            if (!s_ActiveAnimations.Contains(animation)) {
-                s_ActiveAnimations.Add(animation);
-            }
-
-            // If the timer is not already started, start it now.
-            if (s_GlobalTimer == null || !s_GlobalTimer.Enabled) {
-                StartGlobalTimer();
-            }
-        }
-
-        /// <summary>
-        /// Remove an animation from the list of animations which are cycled on the global timer.
-        /// </summary>
-        /// <param name="animation">The animation to unregister.</param>
-        private static void UnregisterAnimation(Animation animation) {
-            s_ActiveAnimations.Remove(animation);
-
-            // If the global timer is running and we no longer have any active animations, we stop the timer.
-            if (s_GlobalTimer != null && s_GlobalTimer.Enabled && s_ActiveAnimations.Count == 0) {
-                KillGlobalTimer();
-            }
-        }
-
         /// <summary>
         /// Start point of the animation.
         /// </summary>
@@ -153,6 +85,8 @@ namespace DotNetFX {
         /// </summary>
         protected double m_Progress;
 
+        private Timer m_Timer;
+
         /// <summary>
         /// Constructs an animation object.
         /// </summary>
@@ -172,6 +106,12 @@ namespace DotNetFX {
             m_Current = new double[m_Start.Length];
             m_State = AnimationState.Stopped;
             m_Progress = 0;
+            m_Timer = new Timer(TIMEOUT);
+            m_Timer.Elapsed += new ElapsedEventHandler(m_Timer_Elapsed);
+        }
+
+        void m_Timer_Elapsed(object sender, ElapsedEventArgs e) {
+            Cycle(e.SignalTime);
         }
 
         /// <summary>
@@ -205,6 +145,14 @@ namespace DotNetFX {
         }
 
         /// <summary>
+        /// Gets or sets the duration of the animation (in milliseconds).
+        /// </summary>
+        public int Duration {
+            get { return m_Duration; }
+            set { m_Duration = value; }
+        }
+
+        /// <summary>
         /// Starts or resumes an animation.
         /// </summary>
         /// <returns>Whether animation was started.</returns>
@@ -227,7 +175,7 @@ namespace DotNetFX {
                 return false;
             }
 
-            UnregisterAnimation(this);
+            m_Timer.Stop();
 
             m_StartTime = DateTime.Now;
 
@@ -250,7 +198,7 @@ namespace DotNetFX {
 
             m_State = AnimationState.Playing;
 
-            RegisterAnimation(this);
+            m_Timer.Start();
             Cycle(m_StartTime);
 
             return true;
@@ -261,7 +209,7 @@ namespace DotNetFX {
         /// </summary>
         /// <param name="gotoEnd">If true, the animation will move to the end co-ordinates.</param>
         public void Stop(bool gotoEnd) {
-            UnregisterAnimation(this);
+            m_Timer.Stop();
             m_State = AnimationState.Stopped;
 
             if (gotoEnd) {
@@ -279,7 +227,7 @@ namespace DotNetFX {
         /// </summary>
         public void Pause() {
             if (m_State == AnimationState.Playing) {
-                UnregisterAnimation(this);
+                m_Timer.Stop();
                 m_State = AnimationState.Paused;
                 OnPause();
             }
@@ -308,7 +256,7 @@ namespace DotNetFX {
             // Animation has finished.
             if (m_Progress == 1) {
                 m_State = AnimationState.Stopped;
-                UnregisterAnimation(this);
+                m_Timer.Stop();
 
                 OnFinish();
                 OnEnd();
