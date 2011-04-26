@@ -1,0 +1,529 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DotNetFX</name>
+    </assembly>
+    <members>
+        <member name="T:DotNetFX.PredefinedEffect">
+            <summary>
+            Abstract class that provides reusable functionality for predefined animations that
+            manipulate a single Windows Forms control.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.Animation">
+            <summary>
+            A class for performing animations and visual transitions.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.TIMEOUT">
+            <summary>Default timeout for animations (in milliseconds).</summary>
+        </member>
+        <member name="F:DotNetFX.Animation.s_ActiveAnimations">
+            <summary>A set of animations which should be cycled on the global timer.</summary>
+        </member>
+        <member name="F:DotNetFX.Animation.s_GlobalTimer">
+            <summary>The global timer.</summary>
+        </member>
+        <member name="M:DotNetFX.Animation.StartGlobalTimer">
+            <summary>Constructs the global timer, attaches a listener, and starts it.</summary>
+        </member>
+        <member name="M:DotNetFX.Animation.KillGlobalTimer">
+            <summary>Stops the global timer, disposes it, and sets the reference to null.</summary>
+        </member>
+        <member name="M:DotNetFX.Animation.CycleAnimations(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            Cycles all registered animations.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.RegisterAnimation(DotNetFX.Animation)">
+            <summary>
+            Register an animation to be cycled on the global timer.
+            </summary>
+            <param name="animation">The animation to register.</param>
+        </member>
+        <member name="M:DotNetFX.Animation.UnregisterAnimation(DotNetFX.Animation)">
+            <summary>
+            Remove an animation from the list of animations which are cycled on the global timer.
+            </summary>
+            <param name="animation">The animation to unregister.</param>
+        </member>
+        <member name="F:DotNetFX.Animation.m_Start">
+            <summary>
+            Start point of the animation.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_End">
+            <summary>
+            End point of the animation.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_Duration">
+            <summary>
+            Duration of the animation in milliseconds.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_AccelFunc">
+            <summary>
+            Acceleration function, which must return a number between 0 and 1 for inputs between 0
+            and 1.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_StartTime">
+            <summary>
+            Timestamp for when the animation was started.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_LastFrame">
+            <summary>
+            Timestamp for when the last frame was run.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_Fps">
+            <summary>
+            Current frame rate.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_EndTime">
+            <summary>
+            Timestamp for when animation is expected to finish.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_Current">
+            <summary>
+            Current co-ordinates for animation.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_State">
+            <summary>
+            Current state of the animation.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.Animation.m_Progress">
+            <summary>
+            Percent of the way through the animation (between 0.0 and 1.0).
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.#ctor(System.Double[],System.Double[],System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs an animation object.
+            </summary>
+            <param name="start">Array of start co-ordinates.</param>
+            <param name="end">Array of end co-ordinates.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.Animation.Play">
+            <summary>
+            Starts or resumes an animation.
+            </summary>
+            <returns>Whether animation was started.</returns>
+        </member>
+        <member name="M:DotNetFX.Animation.Play(System.Boolean)">
+            <summary>
+            Starts or resumes an animation.
+            </summary>
+            <param name="restart">
+            Whether to restart the animation from the beginning if it has been paused.
+            </param>
+            <returns>Whether animation was started.</returns>
+        </member>
+        <member name="M:DotNetFX.Animation.Stop(System.Boolean)">
+            <summary>
+            Stops the animation.
+            </summary>
+            <param name="gotoEnd">If true, the animation will move to the end co-ordinates.</param>
+        </member>
+        <member name="M:DotNetFX.Animation.Pause">
+            <summary>
+            Pauses the animation (iff it's playing).
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.Cycle(System.DateTime)">
+            <summary>
+            Handles the actual iteration of the animation in a timeout.
+            </summary>
+            <param name="now">The current time.</param>
+        </member>
+        <member name="M:DotNetFX.Animation.UpdateCoords(System.Double)">
+            <summary>
+            Calculates current co-ordinates, based on the current state.
+            </summary>
+            <param name="t">Percentage of the way through the animation as a decimal.</param>
+        </member>
+        <member name="M:DotNetFX.Animation.OnAnimate">
+            <summary>
+            Dispatches the Animate event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnBegin">
+            <summary>
+            Dispatches the Begin event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnEnd">
+            <summary>
+            Dispatches the End event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnFinish">
+            <summary>
+            Dispatches the Finish event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnPause">
+            <summary>
+            Dispatches the Pause event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnPlay">
+            <summary>
+            Dispatches the Play event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnResume">
+            <summary>
+            Dispatches the Resume event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Animation.OnStop">
+            <summary>
+            Dispatches the Stop event. Subclasses should override this instead of listening to
+            the event.
+            </summary>
+        </member>
+        <member name="P:DotNetFX.Animation.State">
+            <summary>
+            Gets the animation state.
+            </summary>
+        </member>
+        <member name="P:DotNetFX.Animation.CurrentCoordinates">
+            <summary>
+            Gets the current co-ordinates of the animation.
+            </summary>
+        </member>
+        <member name="P:DotNetFX.Animation.Progress">
+            <summary>
+            Gets the progress of the animation (a number between 0.0 and 1.0).
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.Animate">
+            <summary>
+            Event that is fired on each animation step.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.Begin">
+            <summary>
+            Event that is fired when animation begins.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.End">
+            <summary>
+            Event that is fired when animation ends.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.Finish">
+            <summary>
+            Event that is fired when animation finishes naturally.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.PauseEvent">
+            <summary>
+            Event that is fired when animation is paused.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.PlayEvent">
+            <summary>
+            Event that is fired when the Play method is called.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.Resume">
+            <summary>
+            Event that is fired when animation resumes.
+            </summary>
+        </member>
+        <member name="E:DotNetFX.Animation.StopEvent">
+            <summary>
+            Event that is fired when animation is forcefully stopped.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.Animation.AnimationState">
+            <summary>
+            Enum for the possible states of an animation.
+            </summary>
+        </member>
+        <member name="F:DotNetFX.PredefinedEffect.m_Control">
+            <summary>
+            Windows Forms control that will be used in the animation.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.PredefinedEffect.#ctor(System.Windows.Forms.Control,System.Double[],System.Double[],System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs a PredefinedEffect.
+            </summary>
+            <param name="control">The Windows Forms control to be used in the animation.</param>
+            <param name="start">Array of start co-ordinates.</param>
+            <param name="end">Array of end co-ordinates.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.PredefinedEffect.UpdateStyle">
+            <summary>
+            Called to update the style of the element.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.PredefinedEffect.OnAnimate">
+            <inheritdoc/>
+        </member>
+        <member name="M:DotNetFX.PredefinedEffect.OnEnd">
+            <inheritdoc/>
+        </member>
+        <member name="M:DotNetFX.PredefinedEffect.OnBegin">
+            <inheritdoc/>
+        </member>
+        <member name="T:DotNetFX.Fade">
+            <summary>
+            An animation object that fades the opacity of a control between two limits.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Fade.#ctor(System.Windows.Forms.Control,System.Double,System.Double,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Creates an animation object that fades the opacity of a control between two limits.
+            
+            Start and End should be floats between 0 and 1.
+            </summary>
+            <param name="control">Windows Forms control to be used in the animation.</param>
+            <param name="start">Start opacity.</param>
+            <param name="end">End opacity.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.Fade.UpdateStyle">
+            <summary>
+            Animation event handler that will set the opacity of a control.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Fade.Show">
+            <summary>
+            Animation event handler that will show the control.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Fade.Hide">
+            <summary>
+            Animation event handler that will hide the control.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.ResizeWidth">
+            <summary>
+            An animation object that resizes a control between two widths.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.ResizeWidth.#ctor(System.Windows.Forms.Control,System.Double,System.Double,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Creates an animation object that will resize an element between two widths.
+            </summary>
+            <param name="control">Windows Forms control to be used in the animation.</param>
+            <param name="start">Start width.</param>
+            <param name="end">End width.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.ResizeWidth.UpdateStyle">
+            <summary>
+            Animation event handler that will resize an element by setting its width.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.FadeOut">
+            <summary>
+            Fades a control out from full opacity to completely transparent.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.FadeOut.#ctor(System.Windows.Forms.Control,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs an animation object that fades a control out from full opacity to completely
+            transparent.
+            </summary>
+            <param name="control"></param>
+            <param name="duration"></param>
+            <param name="accelFunc"></param>
+        </member>
+        <member name="T:DotNetFX.FadeInAndShow">
+            <summary>
+            Sets a control to be visible and then fades it in from transparent to opaque.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.FadeIn">
+            <summary>
+            Fades a control in from completely transparent to fully opaque.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.FadeIn.#ctor(System.Windows.Forms.Control,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs an animation that fades a control in from transparent to opaque.
+            </summary>
+            <param name="control">The Windows Forms control to be used in the animation.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.FadeInAndShow.#ctor(System.Windows.Forms.Control,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs an animation that sets a control to be visible and then fades it in from
+            transparent to opaque.
+            </summary>
+            <param name="control">The Windows Forms control to be used in the animation.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.FadeInAndShow.OnBegin">
+            <inheritdoc/>
+        </member>
+        <member name="T:DotNetFX.FadeOutAndHide">
+            <summary>
+            Fades a control out from full opacity to completely transparent and then hides the control.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.FadeOutAndHide.#ctor(System.Windows.Forms.Control,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs an animation object that fades a control out from full opacity to completely
+            transparent and then hides the control.
+            </summary>
+            <param name="control">The Windows Forms control to be used in the animation.</param>
+            <param name="duration">Length of the animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.FadeOutAndHide.OnBegin">
+            <inheritdoc/>
+        </member>
+        <member name="M:DotNetFX.FadeOutAndHide.OnEnd">
+            <inheritdoc/>
+        </member>
+        <member name="T:DotNetFX.Resize">
+            <summary>
+            An animation object that resizes a control between two widths and heights.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Resize.#ctor(System.Windows.Forms.Control,System.Double[],System.Double[],System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Creates an animation object that will resize an element between two widths and heights.
+            
+            Start and End should be 2 dimensional arrays.
+            </summary>
+            <param name="control">Windows Forms control to be used in the animation.</param>
+            <param name="start">2D array for start width and height.</param>
+            <param name="end">2D array for end width and height.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.Resize.UpdateStyle">
+            <summary>
+            Animation event handler that will resize a control by setting its width and height.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.ResizeHeight">
+            <summary>
+            An animation object that resizes a control between two heights.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.ResizeHeight.#ctor(System.Windows.Forms.Control,System.Double,System.Double,System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Creates an animation object that will resize an element between two heights.
+            </summary>
+            <param name="control">Windows Forms control to be used in the animation.</param>
+            <param name="start">Start height.</param>
+            <param name="end">End height.</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.ResizeHeight.UpdateStyle">
+            <summary>
+            Animation event handler that will resize an element by setting its height.
+            </summary>
+        </member>
+        <member name="T:DotNetFX.AnimationException">
+            <summary>
+            An exception that is fired when something goes wrong with animation.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.AnimationException.#ctor(System.String)">
+            <summary>
+            Constructs a new AnimationException.
+            </summary>
+            <param name="message">The exception message to display.</param>
+        </member>
+        <member name="T:DotNetFX.Slide">
+            <summary>
+            Creates an animation object that will slide an element from A to B.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Slide.#ctor(System.Windows.Forms.Control,System.Double[],System.Double[],System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Creates an animation object that will slide an element from A to B.
+            
+            Start and End should be 2 dimensional arrays.
+            </summary>
+            <param name="control">Windows Forms control to be used in the animation.</param>
+            <param name="start">2D array for start co-ordinates (x, y).</param>
+            <param name="end">2D array for end co-ordinates (x, y).</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.Slide.UpdateStyle">
+            <inheritdoc/>
+        </member>
+        <member name="T:DotNetFX.SlideFrom">
+            <summary>
+            Slides an element from its current position.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.SlideFrom.#ctor(System.Windows.Forms.Control,System.Double[],System.Int32,System.Func{System.Double,System.Double})">
+            <summary>
+            Constructs an animation object that slides an element from its current position.
+            </summary>
+            <param name="control">The Windows Forms control to be used in the animation.</param>
+            <param name="end">2D array for end co-ordinates (X, Y).</param>
+            <param name="duration">Length of animation in milliseconds.</param>
+            <param name="accelFunc">Acceleration function, returns 0-1 for inputs 0-1.</param>
+        </member>
+        <member name="M:DotNetFX.SlideFrom.OnBegin">
+            <inheritdoc/>
+        </member>
+        <member name="T:DotNetFX.Easing">
+            <summary>
+            Easing functions for animations.
+            </summary>
+        </member>
+        <member name="M:DotNetFX.Easing.EaseIn(System.Double)">
+            <summary>
+            Ease in - start slow and speed up.
+            </summary>
+            <param name="t">Input between 0 and 1.</param>
+            <returns>Output between 0 and 1.</returns>
+        </member>
+        <member name="M:DotNetFX.Easing.EaseOut(System.Double)">
+            <summary>
+            Ease out - start fast and slow to a stop.
+            </summary>
+            <param name="t">Input between 0 and 1.</param>
+            <returns>Output between 0 and 1.</returns>
+        </member>
+        <member name="M:DotNetFX.Easing.EaseInAndOut(System.Double)">
+            <summary>
+            Ease in and out - start slow, speed up, then slow down.
+            </summary>
+            <param name="t">Input between 0 and 1.</param>
+            <returns>Output between 0 and 1.</returns>
+        </member>
+        <member name="T:DotNetFX.AnimationEvent">
+            <summary>
+            Defines an event handler to handle animation events.
+            </summary>
+            <param name="animation">The animation firing the event.</param>
+        </member>
+    </members>
+</doc>
