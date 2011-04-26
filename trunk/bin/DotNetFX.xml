@@ -498,6 +498,13 @@
             Easing functions for animations.
             </summary>
         </member>
+        <member name="M:DotNetFX.Easing.Linear(System.Double)">
+            <summary>
+            A linear transition.
+            </summary>
+            <param name="t">Input between 0 and 1.</param>
+            <returns>Output between 0 and 1.</returns>
+        </member>
         <member name="M:DotNetFX.Easing.EaseIn(System.Double)">
             <summary>
             Ease in - start slow and speed up.

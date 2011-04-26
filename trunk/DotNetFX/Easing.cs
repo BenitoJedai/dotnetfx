@@ -27,6 +27,15 @@ namespace DotNetFX {
     public static class Easing {
 
         /// <summary>
+        /// A linear transition.
+        /// </summary>
+        /// <param name="t">Input between 0 and 1.</param>
+        /// <returns>Output between 0 and 1.</returns>
+        public static double Linear(double t) {
+            return t;
+        }
+
+        /// <summary>
         /// Ease in - start slow and speed up.
         /// </summary>
         /// <param name="t">Input between 0 and 1.</param>
