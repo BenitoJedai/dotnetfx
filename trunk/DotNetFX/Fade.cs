@@ -48,7 +48,7 @@ namespace DotNetFX {
         /// <summary>
         /// Animation event handler that will set the opacity of a control.
         /// </summary>
-        protected override void UpdateStyle() {
+        protected override void UpdateStyleInternal() {
             if (m_OpacityProperty != null) {
                 m_OpacityProperty.SetValue(m_Control, m_Current[0], null);
             } else {

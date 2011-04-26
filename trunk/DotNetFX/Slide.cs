@@ -44,7 +44,7 @@ namespace DotNetFX {
         }
 
         /// <inheritdoc/>
-        protected override void UpdateStyle() {
+        protected override void UpdateStyleInternal() {
             m_Control.Left = (int)Math.Round(m_Current[0]);
             m_Control.Top = (int)Math.Round(m_Current[1]);
         }

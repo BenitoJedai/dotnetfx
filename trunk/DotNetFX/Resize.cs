@@ -46,7 +46,7 @@ namespace DotNetFX {
         /// <summary>
         /// Animation event handler that will resize a control by setting its width and height.
         /// </summary>
-        protected override void UpdateStyle() {
+        protected override void UpdateStyleInternal() {
             m_Control.Width = (int)Math.Round(m_Current[0]);
             m_Control.Height = (int)Math.Round(m_Current[1]);
         }

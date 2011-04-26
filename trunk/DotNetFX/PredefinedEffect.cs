@@ -48,7 +48,15 @@ namespace DotNetFX {
         /// <summary>
         /// Called to update the style of the element.
         /// </summary>
-        protected abstract void UpdateStyle();
+        protected abstract void UpdateStyleInternal();
+
+        private void UpdateStyle() {
+            if (m_Control.InvokeRequired) {
+                m_Control.Invoke(new Action(UpdateStyleInternal));
+            } else {
+                UpdateStyleInternal();
+            }
+        }
 
         /// <inheritdoc/>
         protected override void OnAnimate() {
